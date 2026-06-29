@@ -66,7 +66,7 @@ const FAMILY = [
     funFact:"She won a district art competition with a portrait of her grandmother.",
     social:{tiktok:'@ruth123',instagram:'@ruth_art45'},
     birthday:'20th September, 2009',
-    extras:{grade:'Grade 9', desiredCareer: "Artist / Content Creator"}
+    extras:{grade:'Grade 10', desiredCareer: "Artist / Content Creator"}
   }
 ];
 
@@ -245,7 +245,7 @@ const FAQS = [
   {q:'Who do I contact for house repairs?',a:'Dad (Tobias) handles all repairs. For urgent matters, call him directly.'},
   {q:'Where are the family documents stored?',a:'Family Library → Important Documents. Protected by the parent password.'},
   {q:'How do I add a calendar event?',a:'Go to Calendar and click on any date to open the Add Event form.'},
-  {q:'How do I reset the site password?',a:'This is a demo. Passwords are: parents zone → "parentsonly", documents → "family123". In a real deployment, contact your site administrator.'},
+  {q:'How do I reset the site password?',a:'Passwords are: parents zone → "parentsonly", documents → "family123".contact your site administrator.'},
 ];
 
 const CONTACTS = [
@@ -611,7 +611,7 @@ function ProfileCard({m,expanded}){
 }
 
 const MILESTONES = [
-  {year:1997,text:'Tobias & Eunice marry in a beautiful ceremony surrounded by family and friends'},
+  {year:2000,text:'Tobias & Eunice marry in a beautiful ceremony surrounded by family and friends'},
   {year:2002,text:'Grace born – the family\'s first child'},
   {year:2003,text:'Alvince born – the only son arrives'},
   {year:2007,text:'Debra born – the family grows with another daughter'},
