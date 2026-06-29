@@ -334,6 +334,11 @@ function Nav({page,setPage,role,setRole,dark,setDark}){
   const [roleMenu,setRoleMenu]=useState(false);
   const toast=useToast();
 
+  React.useEffect(()=>{
+    document.body.style.overflow = menuOpen ? 'hidden' : 'auto';
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [menuOpen]);
+
   const canAccess=(r)=>r.roles.includes(role);
   const handleNav=(path)=>{
     const link=NAV_LINKS.find(l=>l.path===path);
@@ -379,7 +384,7 @@ function Nav({page,setPage,role,setRole,dark,setDark}){
             {ROLE_LABELS[role]} ▾
           </button>
           {roleMenu&&(
-            <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',background:'var(--bg-card)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'8px',minWidth:200,boxShadow:'var(--shadow)',zIndex:2000}}>
+            <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',background:'var(--bg-card)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'8px',minWidth:200,maxWidth:'calc(100vw - 32px)',boxShadow:'var(--shadow)',zIndex:2000}}>
               {Object.entries(ROLE_LABELS).map(([k,v])=>(
                 <button key={k} onClick={()=>handleRole(k)}
                   style={{display:'block',width:'100%',padding:'8px 12px',border:'none',background:role===k?'var(--primary)':ROLE_COLORS[k],color:role===k?'#fff':'#333',borderRadius:8,marginBottom:4,cursor:'pointer',textAlign:'left',fontFamily:'Poppins',fontWeight:600,fontSize:'.85rem'}}>
@@ -389,18 +394,21 @@ function Nav({page,setPage,role,setRole,dark,setDark}){
             </div>
           )}
         </div>
-        <button className="hamburger" onClick={()=>setMenuOpen(!menuOpen)}>
+        <button className="hamburger" onClick={()=>setMenuOpen(!menuOpen)} aria-label="Open menu">
           <span/><span/><span/>
         </button>
       </div>
     </nav>
     {menuOpen&&(
-      <div className="mobile-menu">
-        {NAV_LINKS.map(l=>(
-          <button key={l.path} className={`nav-link${page===l.path?' active':''}`} onClick={()=>handleNav(l.path)}>
-            {!canAccess(l)&&<i className="fas fa-lock" style={{marginRight:4}}/>}{l.label}
-          </button>
-        ))}
+      <div className="mobile-menu-backdrop" onClick={e=>{ if(e.target===e.currentTarget) setMenuOpen(false); }}>
+        <div className="mobile-menu" role="dialog" aria-modal="true" aria-label="Mobile navigation menu">
+          <button className="mobile-menu-close" onClick={()=>setMenuOpen(false)} aria-label="Close menu">×</button>
+          {NAV_LINKS.map(l=>(
+            <button key={l.path} className={`nav-link${page===l.path?' active':''}`} onClick={()=>handleNav(l.path)}>
+              {!canAccess(l)&&<i className="fas fa-lock" style={{marginRight:4}}/>}{l.label}
+            </button>
+          ))}
+        </div>
       </div>
     )}
     </>
@@ -447,7 +455,7 @@ function HomePage({role,setPage}){
     <div className="fade-in">
       {/* Hero Slider */}
       <div className="slider-wrap" style={{margin:0}}>
-        <img src={HERO_IMGS[imgIdx]} alt="Family" className="slider-img" style={{height:'420px',width:'100%'}}/>
+        <img src={HERO_IMGS[imgIdx]} alt="Family" className="slider-img"/>
         <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,.5) 0%,transparent 60%)',display:'flex',flexDirection:'column',justifyContent:'flex-end',padding:'40px'}}>
           <h1 style={{color:'#fff',fontSize:'2.2rem',fontWeight:800,lineHeight:1.2,maxWidth:700}}>
             Welcome to the Okelo Family Hub
@@ -461,7 +469,7 @@ function HomePage({role,setPage}){
 
       <div className="page" style={{paddingTop:32}}>
         {/* Motto */}
-        <div style={{textAlign:'center',marginBottom:32,borderRadius:'var(--radius-l)',position:'relative',overflow:'hidden',height:250}}>
+        <div style={{textAlign:'center',marginBottom:32,borderRadius:'var(--radius-l)',position:'relative',overflow:'hidden',minHeight:200}}>
           <img src="imagesplaceholder2.jpg" alt="Family" style={{width:'100%',height:'100%',objectFit:'cover',position:'absolute',inset:0}}/>
           <div style={{position:'relative',zIndex:1,padding:'20px',height:'100%',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',background:'linear-gradient(135deg,rgba(44,105,117,.6),rgba(224,177,203,.5))'}}>
             <i className="fas fa-quote-left" style={{color:'#fff',fontSize:'1.5rem',opacity:.7}}/>
@@ -965,7 +973,7 @@ function ChoresTab({role}){
       {showAdd&&(
         <div className="card" style={{marginBottom:20}}>
           <div className="card-body">
-            <div style={{display:'grid',gridTemplateColumns:'1fr 2fr 80px 100px',gap:12,alignItems:'end',flexWrap:'wrap'}}>
+            <div className="chore-form-grid">
               <div>
                 <div className="form-label">Child</div>
                 <select className="form-select form-input" value={newChore.child} onChange={e=>setNewChore({...newChore,child:e.target.value})}>
@@ -995,8 +1003,8 @@ function ChoresTab({role}){
         </div>
       )}
       <div className="card">
-        <div style={{padding:'12px 16px',background:'var(--bg)',display:'grid',gridTemplateColumns:'1fr 2fr 80px 100px 120px',gap:12,fontWeight:700,fontSize:'.8rem',color:'var(--text-l)',textTransform:'uppercase'}}>
-          <span>Child</span><span>Task</span><span className="chore-pts">Points</span><span className="chore-due">Due</span><span>Status</span>
+        <div className="chore-header-row">
+          <span>Child</span><span>Task</span><span className="chore-pts-hd">Points</span><span className="chore-due-hd">Due</span><span>Status</span>
         </div>
         {['grace','alvince','debra','ruth'].map(kid=>{
           const kidChores=visible.filter(c=>c.child===kid);
@@ -1067,7 +1075,7 @@ function MealsTab({role}){
         </div>
       )}
       <div style={{overflowX:'auto'}}>
-        <div style={{minWidth:700}}>
+        <div style={{minWidth:'100%'}}>
           <div className="meal-grid">
             <div className="meal-label" style={{fontWeight:700,color:'var(--text)'}}>Meal</div>
             {DAYS.map(d=><div key={d} className="meal-header">{d}</div>)}
@@ -1206,7 +1214,7 @@ function BudgetTab({role}){
         {role==='parent'&&<button className="btn btn-primary btn-sm" onClick={()=>setShowAdd(!showAdd)}>+ Add Expense</button>}
       </div>
       {/* Summary */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16,marginBottom:24}}>
+      <div className="budget-summary-grid">
         {[{label:'Monthly Budget',val:`KES ${total.toLocaleString()}`,color:'var(--primary)'},{label:'Total Spent',val:`KES ${spent.toLocaleString()}`,color:'#f44336'},{label:'Remaining',val:`KES ${(total-spent).toLocaleString()}`,color:'#4caf50'}].map(s=>(
           <div key={s.label} className="card">
             <div className="card-body" style={{textAlign:'center'}}>
@@ -1340,7 +1348,7 @@ function SchoolPage({role}){
       </div>
       {m&&(
         <div className="fade-in">
-          <div style={{display:'flex',gap:16,alignItems:'center',marginBottom:24,background:'var(--bg-card)',borderRadius:'var(--radius-l)',padding:20,border:'1px solid var(--border)'}}>
+          <div style={{display:'flex',gap:16,alignItems:'center',marginBottom:24,background:'var(--bg-card)',borderRadius:'var(--radius-l)',padding:20,border:'1px solid var(--border)',flexWrap:'wrap'}}>
             <img src={m.photo} alt={m.name} style={{width:64,height:64,borderRadius:'50%'}}/>
             <div>
               <div style={{fontWeight:700,fontSize:'1.1rem'}}>{m.name}</div>
@@ -1656,7 +1664,7 @@ function MessagesPage(){
           <h3 style={{marginBottom:12}}>📌 Family Notice Board</h3>
           <div style={{display:'flex',gap:8,marginBottom:16,flexWrap:'wrap'}}>
             <input className="form-input" style={{flex:1}} placeholder="Write a note..." value={newNote} onChange={e=>setNewNote(e.target.value)}/>
-            <select className="form-select form-input" style={{width:140}} value={to} onChange={e=>setTo(e.target.value)}>
+            <select className="form-select form-input" style={{width:'auto',minWidth:120,flexShrink:0}} value={to} onChange={e=>setTo(e.target.value)}>
               <option value="all">All Family</option>
               {FAMILY.map(m=><option key={m.id} value={m.id}>{m.name.split(' ')[0]}</option>)}
             </select>
@@ -1750,7 +1758,7 @@ function GalleryPage(){
           <div className="page-title">Family Gallery</div>
           <p className="page-sub">Our moments in pictures</p>
         </div>
-        <div style={{display:'flex',gap:8}}>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
           <button className="btn btn-outline btn-sm" onClick={shuffle}><i className="fas fa-random"/> Shuffle</button>
           <button className="btn btn-primary btn-sm" onClick={()=>toast('Upload feature coming soon!','info')}><i className="fas fa-upload"/> Upload</button>
         </div>
@@ -2031,7 +2039,7 @@ function ParentsPage(){
 
   return (
     <div className="page fade-in">
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4,flexWrap:'wrap',gap:8}}>
         <div className="page-title">Parents' Corner 💑</div>
         <button className="btn btn-outline btn-sm" onClick={()=>{setUnlocked(false);ls.set('fh_parents_open',false);}}>Lock</button>
       </div>
